@@ -51,52 +51,61 @@ def pwncust(premadr,dernadr):
 
 root = Tk()
 root.title("WhoZzeboss")
-root.geometry("600x150")
+root.geometry("600x100")
 
 app = Frame(root)
 app.grid()
+#msgbttn = StringVar()
 msgbttn = "Je SUIS la gateway de tout ce reseau!!!"
+#msgbttn.set("Je SUIS la gateway de tout ce reseau!!!")
 customiz = BooleanVar()
 customiz.set(False)
-etatcheck = False
+#resultext = StringVar()
+#resultext.set("Allez, un peu de courage... Appuyez!")
+label_premadr = Label(app, text = "debut ou adresse ip simple")
+label_dernadr = Label(app, text = "fin (facultatif)")
 case_premadr = Entry(app, bg= "#BBBBBB")
 case_dernadr = Entry(app, bg= "#BBBBBB")
-result = Label(app, text = "Allez, un peu de courage... Appuyez!")
-
-
-def swcustom():
-	if etatcheck == False:
-		case_premadr["bg"] = "#BBBBBB"
-		case_dernadr["bg"] = "#BBBBBB"
-		msgbttn = "Je SUIS la gateway de tout ce reseau!!!"
-	if etatcheck == True:
-		case_premadr["bg"] = "#FFFFFF"
-		case_dernadr["bg"] = "#FFFFFF"
-		msgbttn = "VOUS allez manger !!!!"
-		
-checkchoix = Checkbutton(app, text = "Range cible", variable = customiz, command = swcustom)
-checkchoix.var = etatcheck
-
-case_premadr.grid(row = 0,column = 1, columnspan = 1, sticky = W)
-
-case_dernadr.grid(row = 0,column = 2, columnspan = 1, sticky = W)
-
-result.grid(row = 2, column = 0)
-
-checkchoix.grid(row = 0, column = 0, sticky = W)
-
-result.grid(row = 2, column = 0)
+#result = Label(app, text = resultext)
+result = Label(app, text = "Allez... un peu de courage !")
 
 def action():
 #agit et affiche un message
+	#resultext.set("Spawnage en cours...")
 	result["text"] = "Spawnage en cours..."
-	if etatcheck == True:
-		pwncust(app.case_premadr.get(),app.case_dernadr.get())
-	if etatcheck == False:
+	if customiz.get():
+		if not case_dernadr.get():
+			pwncust(case_premadr.get(),case_premadr.get())
+		else:
+			pwncust(case_premadr.get(),case_dernadr.get())
+	else:
 		pwnall()
 	
 submit_button = Button(app,text = msgbttn, command = action)
-submit_button.grid(row = 1, column = 0, sticky = W)
+
+def swcustom():
+	if customiz.get():
+		case_premadr["bg"] = "#FFFFFF"
+		case_dernadr["bg"] = "#FFFFFF"
+		submit_button["text"] = "VOUS allez manger !!!!"
+	else:
+		case_premadr["bg"] = "#BBBBBB"
+		case_dernadr["bg"] = "#BBBBBB"
+		submit_button["text"] = "Je SUIS la gateway de tout ce reseau!!!"
+	
+rangetext = "Range cible (facultatif) : " + network
+checkchoix = Checkbutton(app, text = rangetext, variable = customiz, command = swcustom)
+label_premadr.grid(row = 0,column = 1)
+case_premadr.grid(row = 1,column = 1, columnspan = 1, sticky = W)
+label_dernadr.grid(row = 0,column = 2)
+case_dernadr.grid(row = 1,column = 2, columnspan = 1, sticky = W)
+
+result.grid(row = 3, column = 0)
+
+checkchoix.grid(row = 1, column = 0, sticky = W)
+
+
+submit_button.grid(row = 2, column = 0, sticky = W)
 
 
 root.mainloop()
