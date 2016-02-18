@@ -24,15 +24,14 @@ network = str(net1) + '.' + str(net2) + '.' + str(net3) + '.'
 rangenetall = network + '1-254'
 
 class pwnth(threading.Thread):
-    def __init__(self):
-        super(pwnth, self).__init__()
-        self._arret = threading.Event()
+	def __init__(self):
+        	super(pwnth, self).__init__()
+        	self._arret = threading.Event()
 
-    def arret(self):
-        self._arret.set()
-
-    def arrete(self):
-        return self._arret.isSet()
+    	def arret(self):
+        	self._arret.set()
+		def arrete(self):
+        	return self._arret.isSet()
 		
 #fonction pour envoyer le paquet ARP a toute la range en utilisant scapy
 	def pwnall(self):
